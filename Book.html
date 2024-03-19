@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book myticket</title>
+    <link rel="stylesheet" href="./Book.css">
+    <link rel="shortcut icon"
+        href="https://cdn-icons-png.freepik.com/256/1599/1599646.png?ga=GA1.1.615184428.1706532498&semt=ais"
+        type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+</head>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: sans-serif;
+    }
+
+    .contents h1 {
+        margin-left: 10px;
+        font-size: 14px;
+        margin-top: 10px;
+        font-weight: bold;
+        color: rgb(114, 113, 113);
+    }
+
+    .contents img {
+        width: 18px;
+        position: relative;
+        top: 2.5px;
+        color: rgb(114, 113, 113);
+    }
+
+    .contents {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        background-color: white;
+        padding: 10px;
+        z-index: 1;
+    }
+
+    .contents p {
+        font-size: 14px;
+        margin-top: 4px;
+        margin-left: 10px;
+        color: rgb(114, 113, 113);
+        font-weight: bold;
+    }
+
+    .dropdown {
+        position: relative;
+        left: 800px;
+        bottom: 30px;
+        padding: 10px;
+        padding-inline: 20px;
+        border: 1px solid black;
+    }
+
+    .empty {
+        height: 40px;
+        background-color: rgb(135, 134, 136);
+    }
+
+    .seats .status {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        position: sticky;
+        top: 100px;
+        background-color: white;
+        padding: 10px;
+        z-index: 100;
+    }
+
+    .status .item img {
+        width: 20px;
+        position: absolute;
+        margin-left: 90px;
+    }
+
+    .seats {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .seat:hover {
+        background-color: #5cb85c;
+        color: white;
+    }
+
+    .seat {
+        width: 25px;
+        height: 25px;
+        border: 1px solid black;
+        margin: 0 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .seat.selected {
+        background-color: #5cb85c;
+        color: white;
+    }
+
+    .premium-seats,
+    .standard-seats {
+        text-align: center;
+        margin: 30px 30px;
+        cursor: pointer;
+    }
+
+    .seat-space {
+        width: 80px;
+    }
+
+    .footer button {
+        width: 400px;
+        height: 40px;
+        border-radius: 20px;
+        cursor: pointer;
+        border: 0px solid black;
+        background-color: #f84464;
+        color: white;
+        padding: 5px;
+        position: fixed;
+        bottom: 10px;
+        left: 450px;
+    }
+
+    #popup {
+        display: none;
+        position: fixed;
+        margin-left: 750px;
+        margin-top: 330px;
+        margin-bottom: 20px;
+        width: max-content;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+        border-radius: 30px;
+        background-color: white;
+        border: 2px solid #5cb85c;
+        z-index: 100;
+        box-shadow: 1px 3px 2000px 20000px white;
+    }
+
+    #popup-img {
+        height: 300px;
+        width: 250px;
+        margin-left: 200px;
+        border-radius: 6px;
+        align-items: center;
+    }
+
+    #popup-qrcode {
+        margin-left: 270px;
+        height: 100%;
+    }
+
+    #qrcode {
+        display: none;
+    }
+
+    .closePopup {
+        margin-left: 50px;
+        width: 600px;
+        height: 40px;
+        background-color: #f84464;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+
+
+    /* __________________________END OF CSS_________________________ */
+    
+</style>
+
+<body>
+
+    <div class="header">
+        <div class="contents">
+            <h1>HANU-MAN <img
+                    src="https://cdn-icons-png.freepik.com/256/8142/8142567.png?ga=GA1.1.615184428.1706532498&semt=ais"
+                    alt=""></h1>
+            <p>Cinipolis:Lulu Mall, Hyderabad | Today 05, Feb, 1:30PM</p>
+            <select id="ticket-type" name="ticket-type" class="dropdown">
+                <option value="" aria-disabled="">Ticket Type</option>
+                <option value="Standard">Standard</option>
+                <option value="Premium">Premium</option>
+            </select>
+            <select id="quantity" name="quantity" class="dropdown">
+                <option value="" aria-disabled="">Quantity</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+            <div class="empty"></div><br>
+        </div>
+    </div>
+
+    <div class="seats">
+        <div class="status">
+            <div class="item"><img
+                    src="https://cdn-icons-png.freepik.com/256/1263/1263384.png?ga=GA1.1.615184428.1706532498&semt=ais"
+                    alt="">Available</div>
+            <div class="item"><img
+                    src="https://cdn-icons-png.freepik.com/256/1263/1263384.png?ga=GA1.1.615184428.1706532498&semt=ais"
+                    alt="" style="background-color: gray;">Unavaliable</div>
+            <div class="item"><img
+                    src="https://cdn-icons-png.freepik.com/256/1263/1263384.png?ga=GA1.1.615184428.1706532498&semt=ais"
+                    alt="" style="background-color: #5cb85c;">Selected</div>
+        </div>
+        <hr>
+
+        <div class="premium-seats" style="margin-top: 150px;">
+            <h2>Premium-Seats</h2>
+            <hr><br>
+            <div class="seats" id="seatContainerPremium"></div>
+        </div>
+
+        <div class="standard-seats">
+            <h2>Standard-Seats</h2>
+            <hr><br>
+            <div class="seats" id="seatContainer"></div>
+        </div>
+
+        <div class="footer">
+            <button id="proceedButton" onclick="proceedBooking()">PROCEED</button>
+        </div>
+        <br>
+        <hr><br>
+        <div id="qrcode"></div>
+        <div id="popup">
+            <h2>Booking Details</h2><br><br>
+            <img src="https://assets-in.bmscdn.com/discovery-catalog/events/tr:w-400,h-600,bg-CCCCCC:w-400.0,h-660.0,cm-pad_resize,bg-000000,fo-top:l-image,i-discovery-catalog@@icons@@star-icon-202203010609.png,lx-24,ly-615,w-29,l-end:l-text,ie-OS40LzEwICAzOTguMUsgVm90ZXM%3D,fs-29,co-FFFFFF,ly-612,lx-70,pa-8_0_0_0,l-end/et00311673-udfwwghdqy-portrait.jpg"
+                alt="" id="popup-img">
+            <hr><br>
+            <div id="popup-qrcode"></div><br>
+            <hr>
+            <p id="popup-movie-details"></p><br><br>
+            <button onclick="closePopup()" class="closePopup">Close</button>
+        </div>
+
+
+    </div>
+
+    <script>
+        //_____________________SCRIPT FOR PREMIUM-SEATS GENERATION___________________________
+
+        function PremiumSeats(rowLabel, seatCount, gapBetweenPairs) {
+            let rowElement = document.createElement('div');
+            rowElement.className = 'row';
+            let labelElement = document.createElement('div');
+            labelElement.className = 'row-label';
+            labelElement.textContent = rowLabel;
+            rowElement.appendChild(labelElement);
+
+            for (let i = 1; i <= seatCount; i++) {
+                const seatElement = document.createElement('div');
+                seatElement.className = 'seat premium-seat';
+                seatElement.textContent = i;
+
+                seatElement.addEventListener('click', () => toggleSeatSelection(seatElement));
+                rowElement.appendChild(seatElement);
+                if (i % 2 === 0) {
+                    let spaceElement = document.createElement('div');
+                    spaceElement.className = 'seat-space';
+                    rowElement.appendChild(spaceElement);
+                }
+            }
+            document.getElementById('seatContainerPremium').appendChild(rowElement);
+        }
+        PremiumSeats('N ', 14);
+        PremiumSeats('M ', 14);
+
+        // _____________________SCRIPT FOR STANDARD-SEATS GENERATION_________________________________
+
+        function Seats(rowLabel, seatCount) {
+            let rowElement = document.createElement('div');
+            rowElement.className = 'row';
+
+            let labelElement = document.createElement('div');
+            labelElement.className = 'row-label';
+            labelElement.textContent = rowLabel;
+            rowElement.appendChild(labelElement);
+
+            for (let i = 1; i <= seatCount; i++) {
+                let seatElement = document.createElement('div');
+                seatElement.className = 'seat';
+                seatElement.textContent = i;
+
+                if (i % 20 === 0) {
+                    let spaceElement = document.createElement('div');
+                    spaceElement.className = 'seat-space';
+                    rowElement.appendChild(spaceElement);
+                }
+
+                seatElement.addEventListener('click', () => toggleSeatSelection(seatElement));
+                rowElement.appendChild(seatElement);
+            }
+
+            document.getElementById('seatContainer').appendChild(rowElement);
+        }
+        Seats('L ', 26);
+        Seats('K ', 26);
+        Seats('J ', 26);
+        Seats('I', 26);
+        Seats('H', 26);
+        Seats('G', 26);
+        Seats('F', 26);
+        Seats('E ', 26);
+        Seats('D', 26);
+        Seats('C', 26);
+        Seats('B', 26);
+        Seats('A', 26);
+
+        //____________________TAKING THE ELEMENTS INTO THE SCRIPT___________________________
+
+        let ticketTypeToggle = document.getElementById('ticket-type');
+        let quantitySelect = document.getElementById('quantity');
+        let premiumSeatsContainer = document.getElementById('seatContainerPremium');
+        let standardSeatsContainer = document.getElementById('seatContainer');
+        let proceedButton = document.getElementById('proceedButton');
+        let isTicketTypeSelected = false;
+        let isQuantitySelected = false;
+        let isSeatSelected = false;
+        let selectedSeats = [];
+        // _____________ON LOAD ALERT MESSAGE TO SELECT TICKET TYPE________________________
+
+        window.onload = function () {
+            if (ticketTypeToggle.value === "") {
+                alert("Please select a ticket type.");
+            } else {
+                isTicketTypeSelected = true;
+            }
+            retrieveSelectedSeats();
+        };
+
+        // ____________________SCRIPT FOR TICKET TYPE DROP-DOWN_____________________
+
+        ticketTypeToggle.addEventListener('change', () => {
+            const selectedType = ticketTypeToggle.value;
+
+            if (selectedType === '') {
+                isTicketTypeSelected = false;
+            } else {
+                isTicketTypeSelected = true;
+            }
+            if (selectedType === 'Premium') {
+                premiumSeatsContainer.style.pointerEvents = 'all';
+                standardSeatsContainer.style.pointerEvents = 'none';
+            } else {
+                premiumSeatsContainer.style.pointerEvents = 'none';
+                standardSeatsContainer.style.pointerEvents = 'all';
+            }
+        });
+
+        // _________________SCRIPT FOR QUANTITY SELECTION DROP-DOWN______________________
+
+        quantitySelect.addEventListener('change', () => {
+            const selectedQuantity = quantitySelect.value;
+
+            if (selectedQuantity === '') {
+                isQuantitySelected = false;
+            } else {
+                isQuantitySelected = true;
+                quantitySelect.disabled = true;
+            }
+
+            selectedSeats = [];
+            updateProceedButtonVisibility();
+        });
+
+
+
+        // _______________SCRIPT FOR SEAT SELECTION ALERTS_____________________
+
+        function toggleSeatSelection(seatElement) {
+            if (!isTicketTypeSelected) {
+                alert("Please select a ticket type first.");
+                return;
+            }
+
+            if (!isQuantitySelected) {
+                alert("Please select the quantity of tickets.");
+                return;
+            }
+
+            const seatNumber = parseInt(seatElement.textContent);
+            const seatRowLabel = seatElement.closest('.row').querySelector('.row-label').textContent.trim();
+
+            if (seatElement.classList.contains('blocked')) {
+                alert("This seat is already booked.");
+                return;
+            }
+
+            const isSelected = seatElement.classList.contains('selected');
+
+            const remainingQuantity = parseInt(quantitySelect.value) - selectedSeats.length;
+
+            if (isSelected) {
+                seatElement.classList.remove('selected');
+                const index = selectedSeats.findIndex(seat => seat.seatNumber === seatNumber && seat.rowLabel === seatRowLabel);
+                if (index !== -1) {
+                    selectedSeats.splice(index, 1);
+                }
+            } else {
+                if (remainingQuantity > 0) {
+                    const quantity = parseInt(quantitySelect.value);
+                    const seatsToSelect = [seatElement];
+
+                    for (let i = 1; i < quantity; i++) {
+                        const nextSeat = findSeatElement(seatNumber + i, seatRowLabel);
+                        if (nextSeat && !nextSeat.classList.contains('blocked') && !nextSeat.classList.contains('selected')) {
+                            seatsToSelect.push(nextSeat);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    seatsToSelect.forEach(seat => {
+                        seat.classList.add('selected');
+                        selectedSeats.push({ seatNumber: parseInt(seat.textContent), rowLabel: seatRowLabel });
+                    });
+                } else {
+                    alert("You have reached the quantity limit.");
+                    return;
+                }
+            }
+
+            isSeatSelected = selectedSeats.length > 0;
+            updateProceedButtonVisibility();
+            saveSelectedSeats();
+        }
+
+        // _________________SCRIPT FOR RETRIVE OF SEAT  SELECTION_____________________
+
+        function retrieveSelectedSeats() {
+            const storedSeats = JSON.parse(localStorage.getItem('selectedSeats')) || [];
+            storedSeats.forEach((seat) => {
+                const seatElement = findSeatElement(seat.seatNumber, seat.rowLabel);
+                if (seatElement) {
+                    seatElement.classList.add('selected');
+                }
+            });
+            selectedSeats = storedSeats;
+            isSeatSelected = storedSeats.length > 0;
+            updateProceedButtonVisibility();
+        }
+
+
+        // _______________SCRIPT FOR SAVING OF SEATS  SELECTED_____________________
+
+        function saveSelectedSeats() {
+            localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+        }
+
+
+        // _______________ SCRIPT FOR BLOCKING SELECTED SEATS _____________________
+
+        function blockSelectedSeats() {
+            selectedSeats.forEach((seat) => {
+                const seatElement = findSeatElement(seat.seatNumber, seat.rowLabel);
+                if (seatElement) {
+                    seatElement.classList.remove('selected');
+                    seatElement.classList.add('blocked');
+                    seatElement.style.backgroundColor = 'gray';
+                }
+            });
+        }
+
+        // _________________SCRIPT FOR SEAT ELEMENTS __________
+
+        function findSeatElement(seatNumber, rowLabel) {
+            const seats = document.querySelectorAll('.seat');
+            for (const seat of seats) {
+                const seatRowLabel = seat.closest('.row').querySelector('.row-label').textContent.trim();
+                if (seat.textContent.trim() === seatNumber.toString() && seatRowLabel === rowLabel) {
+                    return seat;
+                }
+            }
+            return null;
+        }
+
+        // ______________________ SCRIPT FOR PROCEED BUTTON VISIBILITY_________________
+
+        function updateProceedButtonVisibility() {
+            proceedButton.style.display = isSeatSelected ? 'block' : 'none';
+        }
+        function updateProceedButtonVisibility() {
+            const proceedButton = document.getElementById('proceedButton');
+            proceedButton.style.display = isSeatSelected ? 'block' : 'none';
+        }
+
+        // _________________________ SCRIPT REFRESH OF TICKET TYPE & QUANTITY AFTER PROCEEDING__________________
+
+        function refreshTicketTypeAndQuantity() {
+            ticketTypeToggle.value = "";
+            quantitySelect.value = "";
+            isTicketTypeSelected = false;
+            isQuantitySelected = false;
+        }
+
+        // ________________________________SCRIPT FOR PROCEEDING FOR SELECTED SETATS____________________
+
+        function proceedBooking() {
+            if (!isTicketTypeSelected || !isQuantitySelected || !isSeatSelected) {
+                alert("Please select ticket type, quantity, and seats before proceeding.");
+                return;
+            }
+
+            const bookedSeatNumbers = selectedSeats.map(seat => `${seat.rowLabel}${seat.seatNumber}`).join(', ');
+            alert(`Booking processed successfully!\nBooked Seat Numbers: ${bookedSeatNumbers}`);
+            blockSelectedSeats();
+            localStorage.removeItem('selectedSeats');
+            refreshTicketTypeAndQuantity();
+
+
+            // __________________________SCRIPT FOR GENERATION QR FOR BOOKING _____________________________________
+
+            generateQRCode();
+            displayQRCodePopup();
+            isSeatSelected = false;
+            updateProceedButtonVisibility();
+            quantitySelect.disabled = false;
+
+        }
+
+        // __________________________SCRIPT FOR DISPLAY  GENERATED QR FOR BOOKING ______________________________
+
+        function displayQRCodePopup() {
+            const popup = document.getElementById('popup');
+            const popupQRCodeContainer = document.getElementById('popup-qrcode');
+            const popupMovieDetails = document.getElementById('popup-movie-details');
+
+            popupQRCodeContainer.innerHTML = '';
+            popupMovieDetails.innerHTML = '';
+
+            generateQRCode(popupQRCodeContainer);
+            const movieDetails = `Movie: HANU-MAN, \n Location: Cinipolis, Lulu Mall, Hyderabad, \n Date: Today 30, Jan \n Time: 1:30PM`;
+            popupMovieDetails.textContent = movieDetails;
+            popup.style.display = 'block';
+        }
+
+        // _____________________ SCRIPT FOR CLOSE OF BOOKING POPUP______________________
+
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+
+        // _____________________________QR GENERATION______________
+
+        function generateQRCode(container) {
+            const qrContainer = container || document.getElementById('qrcode');
+            const seatNumbers = selectedSeats.map(seat => seat.seatNumber).join(', ');
+            const movieDetails = `Movie: HANU-MAN\nLocation: Cinipolis, Lulu Mall, Hyderabad\nDate: Today 30, Jan\nTime: 1:30PM`;
+            const combinedText = `${seatNumbers}\n${movieDetails}`;
+
+            qrContainer.innerHTML = '';
+
+            const qr = new QRCode(qrContainer, {
+                text: combinedText,
+                width: 120,
+                height: 100
+            });
+        }
+
+    </script>
+</body>
+
+</html>
